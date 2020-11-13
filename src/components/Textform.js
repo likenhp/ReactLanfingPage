@@ -1,12 +1,13 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import styled from '@emotion/styled';
-import { Divider, Grid, List, ListItem, TextField } from '@material-ui/core';
+import { Divider, Grid, List, ListItem, TextField, Icon } from '@material-ui/core';
 
 const TextForm = ({data}) => {
 
   const [students, setStudents] = useState([])
   const [defaultStudents, setDefault] = useState([])
   const [submission, setSubmission] = useState(null)
+  const [detailedStudents, setDetailed] = useState([])
 
   useEffect(()=> {
     if (data) {
@@ -21,32 +22,54 @@ const TextForm = ({data}) => {
     setStudents(filtered)
   }
 
+  const handleDetailedView = (student, param) => {
+    if (param) {
+      setDetailed([...detailedStudents, student])
+    } else {
+      setDetailed(detailedStudents.filter(id => id !== student))
+    }
+  }
+
   return (
-    
     <div style={{width: '100%'}}>
       <form noValidate autoComplete="off" style={{marginLeft: '5%', marginTop: '1%'}}>
         <TextField id="standard-basic" label="Search by Name" style={{width: '93%'}} onChange={e => handleFilter(e) }/>
       </form>
       <List>
-        {students.length ? students.map((student,index) => {
+        {students.length ? students.map((student) => {
           return(
-            <Fragment key={index}>
+            <Fragment key={student.id}>
               <ListItem style={{padding: '0 0 1rem 0'}}>
                 <Grid container spacing={0}>
-                  <Grid item xs={4} >
+                  <Grid item xs={4}>
                     <Container>
                       <ImageContainer icon={student.pic}></ImageContainer>
                     </Container>
                   </Grid>
-                  <Grid item xs={8}>
+                  <Grid item xs={6}>
                     <h1>{student.firstName} {student.lastName}</h1>
                     <div style={{paddingLeft: '1rem'}}>
                       <div>Email: {student.email}</div>
                       <div>Company: {student.company}</div>
                       <div>Skill: {student.skill}</div>
-                      <div>Average: {student.average}%</div>
+                      {!detailedStudents.includes(student.id) ?
+                        (<div>Average: {student.average}%</div>) : (
+                          student.grades.map( (grade, gIndex) =>
+                        <div key={student.firstName + gIndex}>Test {gIndex}: {' '} {Number.parseFloat(grade).toFixed(0)}%</div>
+                          )
+                        )
+                      }
+                      
                     </div>
                   </Grid>
+                </Grid>
+                <Grid item xs={2}>
+                  <ExpandContainer>
+                    {!detailedStudents.includes(student.id) ? (
+                      <Expand onClick={() => handleDetailedView(student.id, true)}>+</Expand>
+                    ) : (
+                      <Expand onClick={() => handleDetailedView(student.id, false)}>-</Expand>)}
+                  </ExpandContainer>
                 </Grid>
               </ListItem>
               <Divider/>
@@ -85,6 +108,18 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
-  justifyContent: center;
   alignItems: center;
+`
+
+const ExpandContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justifyContent: center;
+  alignItems: top;
+`
+
+const Expand = styled.div`
+  font-size: 4rem;
+  cursor: pointer
 `
