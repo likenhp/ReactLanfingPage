@@ -1,13 +1,16 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import styled from '@emotion/styled';
-import { Divider, Grid, List, ListItem, TextField, Icon } from '@material-ui/core';
+import { Divider, Grid, List, ListItem, TextField, Button } from '@material-ui/core';
 
 const TextForm = ({data}) => {
 
   const [students, setStudents] = useState([])
   const [defaultStudents, setDefault] = useState([])
-  const [submission, setSubmission] = useState(null)
   const [detailedStudents, setDetailed] = useState([])
+  const [taggedStudents, setTaggedStudents] = useState([])
+  const [tagWords, setTag] = useState({})
+  const [tagFlag, setTagFlag] = useState(false)
+  const [nameFlag, setnameFlag] = useState(false)
 
   useEffect(()=> {
     if (data) {
@@ -17,8 +20,9 @@ const TextForm = ({data}) => {
   },[data])
 
   const handleFilter = (e) => {
+    e.preventDefault();
     const characters = e.target.value
-    const filtered = defaultStudents.filter(student => student.firstName.toLowerCase().includes(characters) || student.lastName.toLowerCase().includes(characters))
+    const filtered = defaultStudents.filter(student => student.firstName.toLowerCase().includes(characters.toLowerCase()) || student.lastName.toLowerCase().includes(characters.toLowerCase()))
     setStudents(filtered)
   }
 
@@ -30,10 +34,46 @@ const TextForm = ({data}) => {
     }
   }
 
+  const handleSearchTag = (e) => {
+    e.preventDefault();
+    const characters = e.target.value
+    let filtered = null
+    if (characters.length) {
+      let noTags = defaultStudents.filter(student => student.tags.length)
+      filtered = noTags.filter(student => {
+        const studentMatch = student.tags.filter(tag => tag.toLowerCase().includes(characters.toLowerCase()))
+        if (studentMatch.length) {
+          return true
+        } else {
+          return false
+        }
+      })
+    } else {
+      filtered = defaultStudents
+    }
+    setStudents(filtered)
+  }
+
+  const handleAddTag = (e, student) => {
+    e.preventDefault()
+    student.tags.push(tagWords[student.id])
+    if (!taggedStudents.includes(student.id)) {
+      setTaggedStudents([...taggedStudents, student.id])
+    }
+    setTag({...tagWords, [student.id]: ''})
+  }
+
+  const handleChangeTag = (e, student) => {
+    setTag({...tagWords, [student.id]: e.target.value})
+  }
+
   return (
     <div style={{width: '100%'}}>
       <form noValidate autoComplete="off" style={{marginLeft: '5%', marginTop: '1%'}}>
         <TextField id="standard-basic" label="Search by Name" style={{width: '93%'}} onChange={e => handleFilter(e) }/>
+      </form>
+      <form noValidate autoComplete="off" style={{marginLeft: '5%', marginTop: '1%'}}>
+        <TextField id="standard-basic" label="Search by Tag" style={{width: '93%'}} onChange={e => handleSearchTag(e)}/>
       </form>
       <List>
         {students.length ? students.map((student) => {
@@ -55,11 +95,23 @@ const TextForm = ({data}) => {
                       {!detailedStudents.includes(student.id) ?
                         (<div>Average: {student.average}%</div>) : (
                           student.grades.map( (grade, gIndex) =>
-                        <div key={student.firstName + gIndex}>Test {gIndex}: {' '} {Number.parseFloat(grade).toFixed(0)}%</div>
+                        <div key={student.firstName + gIndex}>Test {gIndex}: <span style={{marginLeft: '1rem'}}></span> {Number.parseFloat(grade).toFixed(0)}%</div>
                           )
                         )
                       }
-                      
+                      {taggedStudents.includes(student.id) ? (
+                      <div>
+                        {student.tags.map((tag, tIndex) => 
+                        <Button 
+                          key={tag + student.id + tIndex} variant="contained" 
+                          style={{margin: '0.2rem', textTransform: 'none'}}>
+                          {tag}
+                        </Button>)}
+                        </div>
+                      ) : null}
+                      <form noValidate autoComplete="off" onSubmit={e => handleAddTag(e, student)}>
+                        <TextField id="standard-basic" label="Add a tag" value={tagWords[student.id] || ''} onChange={e => handleChangeTag(e, student)} />
+                      </form>
                     </div>
                   </Grid>
                 </Grid>
@@ -75,7 +127,7 @@ const TextForm = ({data}) => {
               <Divider/>
             </Fragment>
           )
-        }) : <div>Hello</div>}
+        }) : null}
       </List>
     </div>
   );

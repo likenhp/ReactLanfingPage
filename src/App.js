@@ -19,6 +19,7 @@ class App extends Component {
     const rawData = students.data.students
     const formatted = rawData.map(student => {
       student['average'] = student.grades.reduce((a,b) => parseInt(a) + parseInt(b), 0) /student.grades.length
+      student['tags'] = []
       return student
     })
     this.setState({data: formatted})
