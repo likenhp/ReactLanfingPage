@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import styled from '@emotion/styled';
 import { Divider, Grid, List, ListItem, TextField, Button } from '@material-ui/core';
+import {nameFilter, tagFilter} from '../utils/helper';
 
 const TextForm = ({data}) => {
 
@@ -9,8 +10,9 @@ const TextForm = ({data}) => {
   const [detailedStudents, setDetailed] = useState([])
   const [taggedStudents, setTaggedStudents] = useState([])
   const [tagWords, setTag] = useState({})
-  const [tagFlag, setTagFlag] = useState(false)
-  const [nameFlag, setnameFlag] = useState(false)
+  // flags used to allow searching by both fields
+  const [tagFlag, setTagFlag] = useState(null)
+  const [nameFlag, setnameFlag] = useState(null)
 
   useEffect(()=> {
     if (data) {
@@ -19,13 +21,20 @@ const TextForm = ({data}) => {
     } 
   },[data])
 
+  // filters by name
   const handleFilter = (e) => {
     e.preventDefault();
     const characters = e.target.value
-    const filtered = defaultStudents.filter(student => student.firstName.toLowerCase().includes(characters.toLowerCase()) || student.lastName.toLowerCase().includes(characters.toLowerCase()))
+    characters.length ? setnameFlag(characters) : setnameFlag(null)
+    let filtered = null
+    filtered = nameFilter(defaultStudents, characters)
+    if (tagFlag) {
+      filtered = tagFilter(filtered, tagFlag)
+    }
     setStudents(filtered)
   }
 
+  // toggles the detail grade view  
   const handleDetailedView = (student, param) => {
     if (param) {
       setDetailed([...detailedStudents, student])
@@ -34,26 +43,24 @@ const TextForm = ({data}) => {
     }
   }
 
+  // filters based on tags
   const handleSearchTag = (e) => {
     e.preventDefault();
     const characters = e.target.value
+    characters.length ? setTagFlag(characters) : setTagFlag(null)
     let filtered = null
     if (characters.length) {
-      let noTags = defaultStudents.filter(student => student.tags.length)
-      filtered = noTags.filter(student => {
-        const studentMatch = student.tags.filter(tag => tag.toLowerCase().includes(characters.toLowerCase()))
-        if (studentMatch.length) {
-          return true
-        } else {
-          return false
-        }
-      })
+      filtered = tagFilter(defaultStudents, characters)
     } else {
       filtered = defaultStudents
+    }
+    if (nameFlag) {
+      filtered = nameFilter(filtered, nameFlag)
     }
     setStudents(filtered)
   }
 
+  // process to add a tag to a student
   const handleAddTag = (e, student) => {
     e.preventDefault()
     student.tags.push(tagWords[student.id])
@@ -63,6 +70,7 @@ const TextForm = ({data}) => {
     setTag({...tagWords, [student.id]: ''})
   }
 
+  // handles the changing of the word
   const handleChangeTag = (e, student) => {
     setTag({...tagWords, [student.id]: e.target.value})
   }
