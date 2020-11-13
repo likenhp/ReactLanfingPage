@@ -19,3 +19,21 @@ export async function axiosRoute(method, url, data) {
   })
   return resp
 }
+
+export function nameFilter(array, characters) {
+  const resp = array.filter(student => student.firstName.toLowerCase().includes(characters.toLowerCase()) || student.lastName.toLowerCase().includes(characters.toLowerCase()))
+  return resp
+}
+
+export function tagFilter(array, characters) {
+  let noTags = array.filter(student => student.tags.length)
+  let resp = noTags.filter(student => {
+    const studentMatch = student.tags.filter(tag => tag.toLowerCase().includes(characters.toLowerCase()))
+    if (studentMatch.length) {
+      return true
+    } else {
+      return false
+    }
+  })
+  return resp
+}
