@@ -1,32 +1,42 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import styled from '@emotion/styled';
-import { Divider, Grid, List, ListItem, TextField } from '@material-ui/core';
+import { Divider, Grid, List, ListItem } from '@material-ui/core';
 
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
 const TextForm = ({data}) => {
 
   const [students, setStudents] = useState([])
-  const [defaultStudents, setDefault] = useState([])
   const [submission, setSubmission] = useState(null)
 
   useEffect(()=> {
     if (data) {
       setStudents(data)
-      setDefault(data)
     } 
   },[data])
 
-  const handleFilter = (e) => {
-    const characters = e.target.value
-    const filtered = defaultStudents.filter(student => student.firstName.toLowerCase().includes(characters) || student.lastName.toLowerCase().includes(characters))
-    setStudents(filtered)
-  }
+  // const handleChange = e => {
+  //   setSubmission(e.target.value);
+  // }
+
+  // const handleSubmit = e => {
+  //   e.preventDefault();
+  //   console.log(submission)
+  // }
 
   return (
-    
+    // <form onSubmit={handleSubmit}>
+    //   <label>
+    //     Name:
+    //     <input type="text" value={submission} onChange={handleChange} />
+    //   </label>
+    //   <input type="submit" value="Submit" />
+    // </form>
     <div style={{width: '100%'}}>
-      <form noValidate autoComplete="off" style={{marginLeft: '5%', marginTop: '1%'}}>
-        <TextField id="standard-basic" label="Search by Name" style={{width: '93%'}} onChange={e => handleFilter(e) }/>
-      </form>
       <List>
         {students.length ? students.map((student,index) => {
           return(
