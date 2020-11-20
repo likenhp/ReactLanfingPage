@@ -181,5 +181,8 @@ const ExpandContainer = styled.div`
 
 const Expand = styled.div`
   font-size: 4rem;
-  cursor: pointer
+  cursor: pointer;
+  position: absolute;
+  top: 5%;
+  color: #AAAAAA
 `
